@@ -6,29 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat Bot</title>
   <style>
-     body {
+    body {
       display: flex;
       flex-direction: column;
-      height: 95vh;
+      height: 97dvh;
       background-color: #292838; /* Darker background color */
       color: #ffffff;
       font-family: "Arial", sans-serif;
       margin: 0;
       padding: 20px; /* Adding padding on all four sides */
+      overflow: hidden; /* Hide the scroll of the body */
     }
 
     input[type="text"] {
       color: #ffffff;
       background-color: #1f1f1f;
+      width: 100%;
     }
 
     #chat-container {
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      height: 80vh;
+      overflow-y: scroll; /* Make the chat container scrollable */
       padding: 10px;
-      max-height: 75vh; /* Added a maximum height for the chat container */
     }
 
     #chat-container::-webkit-scrollbar {
@@ -76,11 +78,30 @@
       font-size: 14px; /* Matched the font size to the code block font size */
     }
 
-    .message .code {
-      color: #ffffff;
-      font-family: "Courier New", Courier, monospace;
-      font-size: 14px;
+    .code-container {
+      background: #1f1f1f;
+      padding-left: 30px;
+      padding-bottom: 10px;
+      overflow-x: auto;
+      max-height: 60vh; /* Set a maximum height for the code container */
+      position: relative;
     }
+
+    /* Style for the copy button */
+    .copy-button {
+      cursor: pointer;
+      background-color: #f0f0f0;
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+
 
     form {
       display: flex;
@@ -101,10 +122,22 @@
       padding: 10px 20px;
       border: none;
       border-radius: 5px;
-      background: linear-gradient(45deg, #6143b3, #2b85c3); /* Blue gradient for the button */
+      background: linear-gradient(45deg, #6143b3, #9eecbd); /* Blue gradient for the button */
       color: #ffffff;
       font-size: 16px;
       cursor: pointer;
+    }
+
+    /* Media query for mobile devices */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 6px; /* Decrease the padding on smaller screens */
+      }
+      .message,
+      .message.received,
+      .message.typing {
+        max-width: 90%; /* Increase the message width for better visibility on smaller screens */
+      }
     }
   </style>
 </head>
@@ -145,8 +178,28 @@
           const messagePart = document.createElement("span");
           if (index % 2 === 1) {
             // Treat odd-indexed parts as code blocks
-            messagePart.innerHTML = `<pre><code>${part}</code></pre>`;
-            messagePart.classList.add("code");
+            const codeContainer = document.createElement("div");
+            codeContainer.className = "code-container";
+
+            const codeBlock = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = part;
+            codeBlock.appendChild(code);
+            codeContainer.appendChild(codeBlock);
+
+            // Create the copy button
+            const copyButton = document.createElement("button");
+            copyButton.className = "copy-button";
+            copyButton.textContent = "Copy";
+            copyButton.addEventListener("click", () => {
+              // Copy the code block content to the clipboard
+              navigator.clipboard.writeText(part);
+            });
+
+            // Append the copy button to the code container
+            codeContainer.appendChild(copyButton);
+
+            messagePart.appendChild(codeContainer);
           } else {
             messagePart.textContent = part;
           }
