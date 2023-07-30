@@ -1,8 +1,9 @@
-huggingface_hub
-transformers
-langchain~=0.0.247
-Flask~=2.3.2
-requests
-playsound
-python-dotenv~=1.0.0
-environs
+huggingface_hub==0.0.12
+transformers==4.10.3
+langchain==0.0.247
+Flask==2.3.2
+requests==2.26.0
+playsound==1.3.0
+python-dotenv==1.0.0
+environs==9.3.2
+
