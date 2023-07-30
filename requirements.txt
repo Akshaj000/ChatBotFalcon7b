@@ -1,1 +1,8 @@
-Flask==2.2.2
+huggingface_hub
+transformers
+langchain~=0.0.247
+Flask~=2.3.2
+requests
+playsound
+python-dotenv~=1.0.0
+environs
