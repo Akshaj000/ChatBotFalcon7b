@@ -29,9 +29,8 @@ form.addEventListener("submit", async function (e) {
           message: userInput,
         }),
       });
-
       const data = await response.text();
-      if (data.trim() !== "") {
+      if (data.trim() === "") {
         appendMessage("Sorry, I can't do that yet.", true);
       }
       appendMessage(data, true);
