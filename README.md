@@ -4,4 +4,5 @@ It is a simple chat-bot made using Langchain LLM framework and Falcon 7B an open
 
 ## Future Plans
 
+- Migrate the front-end to next.js and add database to the backend to identify user.
 - To parse through the documents uploaded by user and ask question from that.
