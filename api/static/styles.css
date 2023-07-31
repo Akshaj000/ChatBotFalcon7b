@@ -1,6 +1,7 @@
 body {
   display: flex;
   flex-direction: column;
+  height: 95vh;
   height: 97dvh;
   background-color: #292838; /* Darker background color */
   color: #ffffff;

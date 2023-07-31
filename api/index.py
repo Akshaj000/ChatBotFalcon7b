@@ -7,7 +7,7 @@ from langchain import (
     LLMChain,
     PromptTemplate
 )
-from langchain.memory import ConversationBufferWindowMemory
+# from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
 
 load_dotenv(find_dotenv())
@@ -20,8 +20,8 @@ falcon_llm = HuggingFaceHub(
 )
 
 template = """
-{history}
-{input}
+You are an AI chatbot. You are helping a human with their daily tasks and queries. You greet people when they greet you. You are good at programming.
+{question}  
 """
 
 
@@ -29,10 +29,7 @@ class CleanupOutputParser(BaseOutputParser):
     def parse(self, text: str) -> str:
         user_pattern = r"\nUser"
         text = re.sub(user_pattern, "", text)
-        human_pattern = r"\nHuman:"
-        text = re.sub(human_pattern, "", text)
-        ai_pattern = r"\nAI:"
-        return re.sub(ai_pattern, "", text).strip()
+        return text.strip()
 
     @property
     def _type(self) -> str:
@@ -41,7 +38,7 @@ class CleanupOutputParser(BaseOutputParser):
 
 def factory(message):
     prompt = PromptTemplate(
-        input_variables=["history", "input"],
+        input_variables=["question"],
         template=template
     )
     llm_chain = LLMChain(
@@ -49,12 +46,12 @@ def factory(message):
         verbose=True,
         prompt=prompt,
         output_parser=CleanupOutputParser(),
-        memory=ConversationBufferWindowMemory(
-            memory_key="history",
-        )
+        # memory=ConversationBufferWindowMemory(
+        #     memory_key="history",
+        # )
     )
     output = llm_chain(message)
-    return output["text"] or ""
+    return output['text'] or ""
 
 
 # web GUI
