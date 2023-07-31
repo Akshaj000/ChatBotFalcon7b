@@ -21,7 +21,9 @@ falcon_llm = HuggingFaceHub(
 
 template = """
 You are an AI chatbot. You are helping a human with their daily tasks and queries. You greet people when they greet you. You are good at programming.
-{question}  
+The message from the human is delimited by the word "User". You need to reply to the human's message.
+
+User: {question}  
 """
 
 
@@ -29,6 +31,8 @@ class CleanupOutputParser(BaseOutputParser):
     def parse(self, text: str) -> str:
         user_pattern = r"\nUser"
         text = re.sub(user_pattern, "", text)
+        ai_pattern = r"\nYou:"
+        text = re.sub(ai_pattern, "", text)
         return text.strip()
 
     @property
