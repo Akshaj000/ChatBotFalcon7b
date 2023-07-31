@@ -122,13 +122,21 @@ button[type="submit"] {
   cursor: pointer;
 }
 
+button[type="submit"]:hover {
+  background: linear-gradient(45deg, #760a85, #10daf1); /* Darker blue gradient on hover */
+}
+
+button[type="submit"]:disabled {
+  background: linear-gradient(45deg, #494646, #000000); /* Grey gradient for the button when disabled */
+  cursor: not-allowed;
+}
+
 .bot-message {
   padding: 8px;
   border-radius: 5px;
   margin: 10px;
   text-align: left;
 }
-
 
 /* Media query for mobile devices */
 @media only screen and (max-width: 600px) {

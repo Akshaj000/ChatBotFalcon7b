@@ -1,5 +1,6 @@
 const form = document.getElementById("message-form");
 const chatContainer = document.getElementById("chat-container");
+const submitButton = document.getElementById("submit-button");
 
 function showBotTyping() {
     const typingMessage = document.createElement("div");
@@ -16,7 +17,8 @@ form.addEventListener("submit", async function (e) {
   if (userInput.trim() !== "") {
     appendMessage(userInput, false);
     showBotTyping();
-
+    submitButton.disabled = true;
+    form.reset();
     try {
       const response = await fetch("/send_message", {
         method: "POST",
@@ -29,11 +31,13 @@ form.addEventListener("submit", async function (e) {
       });
 
       const data = await response.text();
+      if (data.trim() !== "") {
+        appendMessage("Sorry, I can't do that yet.", true);
+      }
       appendMessage(data, true);
     } catch (error) {
       console.error("Error sending message:", error);
     }
-
-    form.reset();
+    submitButton.disabled = false;
   }
 });

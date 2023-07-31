@@ -54,7 +54,7 @@ def factory(message):
         )
     )
     output = llm_chain(message)
-    return output["text"]
+    return output["text"] or ""
 
 
 # web GUI
