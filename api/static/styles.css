@@ -1,0 +1,143 @@
+body {
+  display: flex;
+  flex-direction: column;
+  height: 97dvh;
+  background-color: #292838; /* Darker background color */
+  color: #ffffff;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 20px; /* Adding padding on all four sides */
+  overflow: hidden; /* Hide the scroll of the body */
+}
+
+input[type="text"] {
+  color: #ffffff;
+  background-color: #1f1f1f;
+  width: 100%;
+}
+
+#chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  overflow-y: scroll; /* Make the chat container scrollable */
+  padding: 10px;
+}
+
+#chat-container::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+}
+
+#chat-container::-webkit-scrollbar-thumb {
+  background: #7f7f7f; /* Color of the thumb */
+  border-radius: 5px; /* Rounded corners for the thumb */
+}
+
+#chat-container::-webkit-scrollbar-thumb:hover {
+  background: #676767; /* Color of the thumb on hover */
+}
+
+#chat-container::-webkit-scrollbar-track {
+  background: #292838; /* Background color of the track */
+}
+
+.message {
+  background: linear-gradient(45deg, #6143b3, #0a65a1);
+  color: #ffffff;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  align-self: flex-end;
+  max-width: 70%;
+  white-space: pre-wrap;
+  font-size: 16px; /* Increased the font size for better readability */
+}
+
+.message.received {
+  background: linear-gradient(45deg, #0a4d77, #03545b);
+  color: #ffffff;
+  align-self: flex-start;
+  max-width: 70%;
+  white-space: pre-wrap;
+}
+
+.message.typing {
+  background: linear-gradient(45deg, #4d4d4d, #595959); /* Changed the color of the typing message */
+  align-self: flex-start;
+  max-width: 70%;
+  white-space: pre-wrap;
+  font-size: 14px; /* Matched the font size to the code block font size */
+}
+
+.code-container {
+  /*background: #1f1f1f;*/
+  /*padding-left: 30px;*/
+  /*padding-bottom: 10px;*/
+  /*overflow-x: auto;*/
+  /*max-height: 60vh; !* Set a maximum height for the code container *!*/
+  padding-top: 30px;
+  position: relative;
+}
+
+/* Style for the copy button */
+.copy-button {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.72);
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+.copy-button {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+
+form {
+  display: flex;
+  margin-top: auto;
+  padding: 10px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button[type="submit"] {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background: linear-gradient(45deg, #6143b3, #9eecbd); /* Blue gradient for the button */
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.bot-message {
+  padding: 8px;
+  border-radius: 5px;
+  margin: 10px;
+  text-align: left;
+}
+
+
+/* Media query for mobile devices */
+@media only screen and (max-width: 600px) {
+  body {
+    padding: 6px; /* Decrease the padding on smaller screens */
+  }
+  .message,
+  .message.received,
+  .message.typing {
+    max-width: 90%; /* Increase the message width for better visibility on smaller screens */
+  }
+}

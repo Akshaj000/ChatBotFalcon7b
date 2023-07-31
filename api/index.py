@@ -1,54 +1,28 @@
 import re
-
-import transformers
+import os
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, render_template, request
-from langchain import LLMChain, PromptTemplate, HuggingFacePipeline
+from langchain import (
+    HuggingFaceHub,
+    LLMChain,
+    PromptTemplate
+)
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
 
 load_dotenv(find_dotenv())
 
-model_id = 'tiiuae/falcon-40b-instruct'
-# falcon_llm = HuggingFaceHub(
-#     huggingfacehub_api_token=os.environ['API_KEY'],
-#     repo_id=model_id,
-#     model_kwargs={"temperature": 0.8, "max_new_tokens": 2000}
-# )
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    cache_dir='./workspace/',
-    torch_dtype=torch.bfloat16,
-    trust_remote_code=True,
-    device_map="auto",
-    offload_folder="offload"
+model_id = 'tiiuae/falcon-7b-instruct'
+falcon_llm = HuggingFaceHub(
+    huggingfacehub_api_token=os.environ['API_KEY'],
+    repo_id=model_id,
+    model_kwargs={"temperature": 0.1, "max_new_tokens": 2000}
 )
-model.eval()
-pipeline = transformers.pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    device_map="auto",
-    max_length=400,
-    do_sample=True,
-    top_k=10,
-    num_return_sequences=1,
-    eos_token_id=tokenizer.eos_token_id,
-)
-
-falcon_llm = HuggingFacePipeline(pipeline=pipeline)
 
 template = """
-The following is a conversation between a human and an AI. The AI is knowledgeable in various fields and is here to 
-assist human with any questions they have. AI can also solve coding problems and help with debugging. When returning code snippets,
-ai will wrap them inside ```.
-Current conversation:
 {history}
-Human: {input}
-AI:""".strip()
+{input}
+"""
 
 
 class CleanupOutputParser(BaseOutputParser):
@@ -72,17 +46,15 @@ def factory(message):
     )
     llm_chain = LLMChain(
         llm=falcon_llm,
-        prompt=prompt,
         verbose=True,
+        prompt=prompt,
         output_parser=CleanupOutputParser(),
         memory=ConversationBufferWindowMemory(
             memory_key="history",
-            k=6,
-            return_only_outputs=True
         )
     )
     output = llm_chain(message)
-    return output['text']
+    return output["text"]
 
 
 # web GUI
