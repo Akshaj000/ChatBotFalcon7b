@@ -4,10 +4,10 @@ from dotenv import find_dotenv, load_dotenv
 from flask import Flask, render_template, request
 from langchain import (
     HuggingFaceHub,
-    LLMChain,
+    ConversationChain,
     PromptTemplate
 )
-# from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
 
 load_dotenv(find_dotenv())
@@ -20,42 +20,51 @@ falcon_llm = HuggingFaceHub(
 )
 
 template = """
-You are an AI chatbot. You are helping a human with their daily tasks and queries. You greet people when they greet you. You are good at programming.
-The message from the human is delimited by the word "User". You need to reply to the human's message.
-
-User: {question}  
-"""
+The following is a conversation between a user and an AI. You need to reply to the human's message.
+While returning a code, please make sure that the code is delimited by the following pattern:```<lang> <code>```
+Current conversations:
+{history}
+Human: {input}
+AI:
+""".strip()
 
 
 class CleanupOutputParser(BaseOutputParser):
     def parse(self, text: str) -> str:
         user_pattern = r"\nUser"
         text = re.sub(user_pattern, "", text)
-        ai_pattern = r"\nYou:"
+        ai_pattern = r"\nAI:"
         text = re.sub(ai_pattern, "", text)
-        return text.strip()
+        human_pattern = r"\nHuman:"
+        text = re.sub(human_pattern, "", text)
+        return text
 
     @property
     def _type(self) -> str:
         return "output_parser"
 
 
+prompt = PromptTemplate(
+    input_variables=["history", "input"],
+    template=template
+)
+
+memory = ConversationBufferWindowMemory(
+    memory_key="history", k=4, return_only_outputs=True
+)
+
+chain = ConversationChain(
+    llm=falcon_llm,
+    verbose=True,
+    prompt=prompt,
+    output_parser=CleanupOutputParser(),
+    memory=memory
+)
+
+
 def factory(message):
-    prompt = PromptTemplate(
-        input_variables=["question"],
-        template=template
-    )
-    llm_chain = LLMChain(
-        llm=falcon_llm,
-        verbose=True,
-        prompt=prompt,
-        output_parser=CleanupOutputParser(),
-        # memory=ConversationBufferWindowMemory(
-        #     memory_key="history",
-        # )
-    )
-    output = llm_chain(message)
-    return output['text'] or ""
+    output = chain.predict(input=message)
+    return output
 
 
 # web GUI

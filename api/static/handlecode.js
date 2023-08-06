@@ -23,6 +23,7 @@ function appendMessage(content, isReceived) {
         codeContainer.className = `code-container language-${language || 'plaintext'}`;
 
         const codeBlock = document.createElement("pre");
+        codeBlock.className = "scroll";
         const code = document.createElement("code");
         code.textContent = parts[index + 1]; // Code content is at odd-indexed part
         codeBlock.appendChild(code);

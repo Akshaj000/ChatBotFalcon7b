@@ -26,20 +26,20 @@ input[type="text"] {
   padding: 10px;
 }
 
-#chat-container::-webkit-scrollbar {
+.scroll::-webkit-scrollbar {
   width: 10px; /* Width of the scrollbar */
 }
 
-#chat-container::-webkit-scrollbar-thumb {
+.scroll::-webkit-scrollbar-thumb {
   background: #7f7f7f; /* Color of the thumb */
   border-radius: 5px; /* Rounded corners for the thumb */
 }
 
-#chat-container::-webkit-scrollbar-thumb:hover {
+.scroll::-webkit-scrollbar-thumb:hover {
   background: #676767; /* Color of the thumb on hover */
 }
 
-#chat-container::-webkit-scrollbar-track {
+.scroll::-webkit-scrollbar-track {
   background: #292838; /* Background color of the track */
 }
 
