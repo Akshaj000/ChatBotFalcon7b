@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request
-from model import LLM
+from api.model import LLM
 
 # web GUI
 app = Flask(__name__)
