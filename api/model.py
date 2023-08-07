@@ -141,7 +141,8 @@ class LLM:
         from langchain.document_loaders import PyPDFLoader
         from langchain.text_splitter import CharacterTextSplitter
         from langchain.vectorstores import Pinecone
-        from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+        from langchain.embeddings import HuggingFaceHubEmbeddings
+
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(file.read())
             file_path = temp_file.name
@@ -154,7 +155,11 @@ class LLM:
         loader = PyPDFLoader(file_path)
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
-        embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+        embedding = HuggingFaceHubEmbeddings(
+            repo_id="sentence-transformers/all-MiniLM-L6-v2",
+            task="feature-extraction",
+            huggingfacehub_api_token=os.environ["API_KEY"],
+        )
 
         index_name = self.index_name
         self.delete_index()
