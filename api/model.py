@@ -135,12 +135,15 @@ class LLM:
         except Exception:
             pass
 
-    def load_document(self, file_path):
+    def load_document(self, file):
+        import tempfile
         from langchain.document_loaders import PyPDFLoader
         from langchain.text_splitter import CharacterTextSplitter
         from langchain.vectorstores import Pinecone
         from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(file.read())
+            file_path = temp_file.name
         text_splitter = CharacterTextSplitter(
             separator="\n",
             chunk_size=1000,

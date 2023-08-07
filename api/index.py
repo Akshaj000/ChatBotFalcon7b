@@ -6,29 +6,10 @@ from api.model import LLM
 app = Flask(__name__)
 llm = LLM()
 
-# Folder to store uploaded documents
-UPLOAD_FOLDER = 'api/uploaded_documents'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def delete_old_document():
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.startswith('uploaded_document.'):
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            os.remove(file_path)
-    return "Old documents deleted.", 200
-
-
-def any_file_uploaded():
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        if filename.startswith('uploaded_document.'):
-            return True
-    return False
 
 
 @app.route("/")
@@ -41,7 +22,6 @@ def new():
     global llm
     llm.delete_index()
     llm = LLM()
-    delete_old_document()
     return "New conversation started.", 200
 
 
@@ -74,11 +54,7 @@ def upload_file():
             return "No selected file.", 400
 
         if file and allowed_file(file.filename):
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-            filename = "uploaded_document." + file.filename.rsplit('.', 1)[1].lower()
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            llm.load_document(filename)
+            llm.load_document(file)
             return "File uploaded successfully.", 200
         else:
             return "Invalid file format. Allowed formats: txt, pdf, doc, docx.", 400
