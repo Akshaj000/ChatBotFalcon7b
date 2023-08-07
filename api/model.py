@@ -176,7 +176,8 @@ class LLM:
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
         self.upload_status = "UPLOADING"
-        threading.Thread(target=self.create_index, args=(docs,)).start()
+        thread = threading.Thread(target=self.create_index, args=(docs,))
+        thread.start()
 
 
 __all__ = ["LLM"]

@@ -74,6 +74,10 @@ function checkUploadStatus() {
           fileInput.disabled = false;
           submitButton.disabled = false;
           appendMessage('File uploaded successfully!', true);
+      } else if (status === "NOT_UPLOADED") {
+          fileInput.disabled = false;
+          submitButton.disabled = false;
+          appendMessage('File upload failed. Please try again.', true);
       }
     })
     .catch(error => console.error('Error checking upload status:', error));
