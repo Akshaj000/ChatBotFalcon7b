@@ -7,5 +7,3 @@ tokenizers==0.13.3
 pypdf==3.15.0
 pinecone-client==2.2.2
 sentence_transformers==2.2.2
-nltk==3.8.1
-
