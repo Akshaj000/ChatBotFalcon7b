@@ -68,12 +68,12 @@ function checkUploadStatus() {
   fetch('/check-upload')
     .then(response => response.text())
     .then(status => {
-      if (status === 'UPLOADING') {
+      if (status !== 'UPLOADED' || status !== 'NOT_UPLOADED') {
         setTimeout(checkUploadStatus, 5000);
       } else if (status === 'UPLOADED') {
           fileInput.disabled = false;
           submitButton.disabled = false;
-          appendMessage('File uploaded successfully!', true);
+          appendMessage('File is uploading. Please wait...', true);
       } else if (status === "NOT_UPLOADED") {
           fileInput.disabled = false;
           submitButton.disabled = false;
