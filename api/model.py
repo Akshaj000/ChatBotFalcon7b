@@ -11,7 +11,6 @@ from langchain import (
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
 import pinecone
-import threading
 
 load_dotenv(find_dotenv())
 
@@ -71,6 +70,8 @@ class LLM:
         model_id='tiiuae/falcon-7b-instruct',
         api_key=os.environ['API_KEY']
     ):
+        self.embedding = None
+        self.docs = None
         self.upload_status = "NOT_UPLOADED"
         self.vectordb = None
         self.model_id = model_id
@@ -134,30 +135,6 @@ class LLM:
         except Exception:
             pass
 
-    def create_index(self, docs):
-        from langchain.vectorstores import Pinecone
-        from langchain.embeddings import HuggingFaceHubEmbeddings
-
-        embedding = HuggingFaceHubEmbeddings(
-            repo_id="sentence-transformers/all-MiniLM-L6-v2",
-            task="feature-extraction",
-            huggingfacehub_api_token=os.environ["API_KEY"],
-        )
-        index_name = self.index_name
-        self.delete_index()
-        pinecone.create_index(
-            name=index_name,
-            metric='cosine',
-            dimension=384
-        )
-
-        self.vectordb = Pinecone.from_documents(
-            docs,
-            embedding,
-            index_name=index_name
-        )
-        self.upload_status = "UPLOADED"
-
     def load_document(self, file):
         import tempfile
         from langchain.document_loaders import PyPDFLoader
@@ -175,9 +152,35 @@ class LLM:
         loader = PyPDFLoader(file_path)
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
-        self.upload_status = "UPLOADING"
-        thread = threading.Thread(target=self.create_index, args=(docs,))
-        thread.start()
+        self.upload_status = "UPLOADING-PHASE-1"
+        self.docs = docs
+
+    def create_index(self):
+        from langchain.embeddings import HuggingFaceHubEmbeddings
+
+        self.upload_status = "UPLOADING-PHASE-2"
+        embedding = HuggingFaceHubEmbeddings(
+            repo_id="sentence-transformers/all-MiniLM-L6-v2",
+            task="feature-extraction",
+            huggingfacehub_api_token=os.environ["API_KEY"],
+        )
+        self.embedding = embedding
+        self.delete_index()
+        pinecone.create_index(
+            name=self.index_name,
+            metric='cosine',
+            dimension=384
+        )
+
+    def upload_index(self):
+        from langchain.vectorstores import Pinecone
+        self.upload_status = "UPLOADING-PHASE-3"
+        self.vectordb = Pinecone.from_documents(
+            self.docs,
+            embedding=self.embedding,
+            index_name=self.index_name,
+        )
+        self.upload_status = "UPLOADED"
 
 
 __all__ = ["LLM"]

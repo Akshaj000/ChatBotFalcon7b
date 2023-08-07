@@ -64,7 +64,14 @@ def upload_file():
 
 @app.route('/check-upload', methods=['GET'])
 def check_upload():
-    return llm.upload_status
+    status = llm.upload_status
+    if status == "UPLOADING-PHASE-1":
+        llm.create_index()
+    if status == "UPLOADING-PHASE-2":
+        llm.upload_index()
+    if status.startswith("UPLOADING"):
+        status = "UPLOADING"
+    return status, 200
 
 
 if __name__ == '__main__':
