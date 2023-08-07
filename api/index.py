@@ -39,6 +39,7 @@ def home():
 @app.route("/new")
 def new():
     global llm
+    llm.delete_index()
     llm = LLM()
     delete_old_document()
     return "New conversation started.", 200

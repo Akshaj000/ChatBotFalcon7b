@@ -72,6 +72,7 @@ class LLM:
     ):
         self.vectordb = None
         self.model_id = model_id
+        self.index_name = "falcon-bot"
         self.llm = HuggingFaceHub(
             huggingfacehub_api_token=api_key,
             repo_id=model_id,
@@ -128,8 +129,14 @@ class LLM:
             output = self.chain.predict(input=message)
         return output
 
+    def delete_index(self):
+        try:
+            pinecone.delete_index(self.index_name)
+        except Exception:
+            pass
+
     def load_document(self):
-        from langchain.document_loaders import PyPDFium2Loader
+        from langchain.document_loaders import PyPDFLoader
         from langchain.text_splitter import CharacterTextSplitter
         from langchain.vectorstores import Pinecone
         from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
@@ -140,22 +147,18 @@ class LLM:
             chunk_overlap=150,
             length_function=len
         )
-        loader = PyPDFium2Loader("api/static/uploads/uploaded_document.pdf")
+        loader = PyPDFLoader("api/static/uploads/uploaded_document.pdf")
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
         embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-        index_name = "chat-bot"
-        if index_name in pinecone.list_indexes():
-            pinecone.delete_index(index_name)
-        # First, check if our index already exists. If it doesn't, we create it
-        if index_name not in pinecone.list_indexes():
-            # we create a new index
-            pinecone.create_index(
-                name=index_name,
-                metric='cosine',
-                dimension=384
-            )
+        index_name = self.index_name
+        self.delete_index()
+        pinecone.create_index(
+            name=index_name,
+            metric='cosine',
+            dimension=384
+        )
 
         self.vectordb = Pinecone.from_documents(
             docs,
