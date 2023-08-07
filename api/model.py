@@ -129,12 +129,6 @@ class LLM:
             output = self.chain.predict(input=message)
         return output
 
-    def delete_index(self):
-        try:
-            pinecone.delete_index(self.index_name)
-        except Exception:
-            pass
-
     def load_document(self, file):
         import tempfile
         from langchain.document_loaders import PyPDFLoader
@@ -155,9 +149,8 @@ class LLM:
         self.upload_status = "UPLOADING-PHASE-1"
         self.docs = docs
 
-    def create_index(self):
+    def set_embedding(self):
         from langchain.embeddings import HuggingFaceHubEmbeddings
-
         self.upload_status = "UPLOADING-PHASE-2"
         embedding = HuggingFaceHubEmbeddings(
             repo_id="sentence-transformers/all-MiniLM-L6-v2",
@@ -165,7 +158,16 @@ class LLM:
             huggingfacehub_api_token=os.environ["API_KEY"],
         )
         self.embedding = embedding
-        self.delete_index()
+
+    def delete_index(self):
+        self.upload_status = "UPLOADING-PHASE-3"
+        try:
+            pinecone.delete_index(self.index_name)
+        except Exception:
+            pass
+
+    def create_index(self):
+        self.upload_status = "UPLOADING-PHASE-4"
         pinecone.create_index(
             name=self.index_name,
             metric='cosine',
@@ -174,7 +176,7 @@ class LLM:
 
     def upload_index(self):
         from langchain.vectorstores import Pinecone
-        self.upload_status = "UPLOADING-PHASE-3"
+        self.upload_status = "UPLOADING-PHASE-5"
         self.vectordb = Pinecone.from_documents(
             self.docs,
             embedding=self.embedding,

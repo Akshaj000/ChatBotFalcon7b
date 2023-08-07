@@ -66,8 +66,12 @@ def upload_file():
 def check_upload():
     status = llm.upload_status
     if status == "UPLOADING-PHASE-1":
+        llm.set_embedding()
+    elif status == "UPLOADING-PHASE-2":
+        llm.delete_index()
+    elif status == "UPLOADING-PHASE-3":
         llm.create_index()
-    if status == "UPLOADING-PHASE-2":
+    elif status == "UPLOADING-PHASE-4":
         llm.upload_index()
     if status.startswith("UPLOADING"):
         status = "UPLOADING"
