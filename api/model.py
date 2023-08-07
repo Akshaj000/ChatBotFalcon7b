@@ -10,9 +10,16 @@ from langchain import (
 )
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
-# import langchain
-# langchain.debug = True
+import pinecone
+
+
 load_dotenv(find_dotenv())
+
+
+pinecone.init(
+    api_key=os.environ["PINECONE_API_KEY"],  # api key in console
+    environment=os.environ["PINECONE_ENVIRONMENT"],  # environment name
+)
 
 
 class CleanupOutputParser(BaseOutputParser):
@@ -124,7 +131,7 @@ class LLM:
     def load_document(self):
         from langchain.document_loaders import PyPDFium2Loader
         from langchain.text_splitter import CharacterTextSplitter
-        from langchain.vectorstores import Chroma
+        from langchain.vectorstores import Pinecone
         from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
         text_splitter = CharacterTextSplitter(
@@ -136,12 +143,24 @@ class LLM:
         loader = PyPDFium2Loader("api/static/uploads/uploaded_document.pdf")
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
-
         embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-        self.vectordb = Chroma.from_documents(
-            documents=docs,
-            embedding=embedding,
-            persist_directory="api/docs/chroma/"
+
+        index_name = "chat-bot"
+        if index_name in pinecone.list_indexes():
+            pinecone.delete_index(index_name)
+        # First, check if our index already exists. If it doesn't, we create it
+        if index_name not in pinecone.list_indexes():
+            # we create a new index
+            pinecone.create_index(
+                name=index_name,
+                metric='cosine',
+                dimension=384
+            )
+
+        self.vectordb = Pinecone.from_documents(
+            docs,
+            embedding,
+            index_name=index_name
         )
 
 
