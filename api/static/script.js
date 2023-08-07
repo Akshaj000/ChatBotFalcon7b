@@ -68,16 +68,16 @@ function checkUploadStatus() {
   fetch('/check-upload')
     .then(response => response.text())
     .then(status => {
-      if (status !== 'UPLOADED' || status !== 'NOT_UPLOADED') {
-        setTimeout(checkUploadStatus, 5000);
-      } else if (status === 'UPLOADED') {
+      if (status === 'UPLOADED') {
           fileInput.disabled = false;
           submitButton.disabled = false;
-          appendMessage('File is uploading. Please wait...', true);
+          appendMessage('File is uploaded successfully.', true);
       } else if (status === "NOT_UPLOADED") {
           fileInput.disabled = false;
           submitButton.disabled = false;
           appendMessage('File upload failed. Please try again.', true);
+      } else {
+          setTimeout(checkUploadStatus, 5000)
       }
     })
     .catch(error => console.error('Error checking upload status:', error));
