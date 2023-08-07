@@ -55,7 +55,8 @@ RETRIEVAL_TEMPLATE = """
 The following is a conversation between a human and an AI. You need to reply to the human's messages.
 AI should only reply to the most recent exchange of the Human.
 While returning code, wrap it inside ```. Also include the language for example ```python.
-Use the following pieces of context delimited by %%% to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+Use the following pieces of context delimited by %%% to answer the question at the end.
+If you don't know the answer, just reply with "I don't know".
 %%%{context}%%%
 Current conversations:
 {history}
