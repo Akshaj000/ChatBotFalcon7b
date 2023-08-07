@@ -2,6 +2,7 @@ const form = document.getElementById("message-form");
 const uploadForm = document.getElementById("upload-form");
 const chatContainer = document.getElementById("chat-container");
 const submitButton = document.getElementById("submit-button");
+const fileInput = document.getElementById('file-input');
 
 function showBotTyping() {
     const typingMessage = document.createElement("div");
@@ -63,29 +64,45 @@ form.addEventListener("submit", async function (e) {
 });
 
 
-uploadForm.addEventListener("change", async function (e) {
-    e.preventDefault();
-    appendMessage("Uploading file...", true)
-    const formData = new FormData(uploadForm);
-    const file = formData.get("file");
-    const fileInput = document.getElementById("file-input");
-    fileInput.disabled = true;
-    if (file) {
-        fetch('/upload', {
-            method: "POST",
-            body: formData,
-        })
-        .then(response => {
-            fileInput.disabled = false;
-            if (response.status !== 200){
-                uploadForm.reset();
-                return response.text()
-            }
-            return "File uploaded successfully! You can ask questions based on the file."
-        })
-        .then(data => {
-            appendMessage(data, true);
-        })
-        .catch(error => console.error("Error resetting conversation:", error));
-    }
+function checkUploadStatus() {
+  fetch('/check-upload')
+    .then(response => response.text())
+    .then(status => {
+      if (status === 'UPLOADING') {
+        setTimeout(checkUploadStatus, 5000);
+      } else if (status === 'UPLOADED') {
+          fileInput.disabled = false;
+          submitButton.disabled = false;
+          appendMessage('File uploaded successfully!', true);
+      }
+    })
+    .catch(error => console.error('Error checking upload status:', error));
+}
+
+
+// Modify the uploadForm event listener to include the checkUploadStatus function
+uploadForm.addEventListener('change', async function (e) {
+  e.preventDefault();
+  const formData = new FormData(uploadForm);
+  const file = formData.get('file');
+  fileInput.disabled = true;
+  submitButton.disabled = true;
+  if (file) {
+    fetch('/upload', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          uploadForm.reset();
+          return response.text();
+        }
+        return 'File is uploading. Please wait...';
+      })
+      .then(data => {
+        appendMessage(data, true);
+        checkUploadStatus(); // Start checking the upload status
+      })
+      .catch(error => console.error('Error uploading file:', error));
+  }
 });

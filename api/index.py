@@ -62,5 +62,10 @@ def upload_file():
         return "An error occurred: {}".format(str(e)), 500
 
 
+@app.route('/check-upload', methods=['GET'])
+def check_upload():
+    return llm.upload_status
+
+
 if __name__ == '__main__':
     app.run(debug=True)

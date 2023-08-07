@@ -11,7 +11,7 @@ from langchain import (
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.schema import BaseOutputParser
 import pinecone
-
+import threading
 
 load_dotenv(find_dotenv())
 
@@ -71,6 +71,7 @@ class LLM:
         model_id='tiiuae/falcon-7b-instruct',
         api_key=os.environ['API_KEY']
     ):
+        self.upload_status = "NOT_UPLOADED"
         self.vectordb = None
         self.model_id = model_id
         self.index_name = "falcon-bot"
@@ -117,15 +118,12 @@ class LLM:
         )
 
     def predict(self, message):
-        if self.vectordb is not None:
+        if self.upload_status == "UPLOADED":
             docs = self.vectordb.similarity_search(message, k=1)
-            try:
-                output = self.retrieval_chain.predict(
-                    input=message,
-                    context=docs[0].page_content
-                )
-            except Exception:
-                output = self.chain.predict(input=message)
+            output = self.retrieval_chain.predict(
+                input=message,
+                context=docs[0].page_content
+            )
         else:
             output = self.chain.predict(input=message)
         return output
@@ -136,31 +134,15 @@ class LLM:
         except Exception:
             pass
 
-    def load_document(self, file):
-        import tempfile
-        from langchain.document_loaders import PyPDFLoader
-        from langchain.text_splitter import CharacterTextSplitter
+    def create_index(self, docs):
         from langchain.vectorstores import Pinecone
         from langchain.embeddings import HuggingFaceHubEmbeddings
 
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(file.read())
-            file_path = temp_file.name
-        text_splitter = CharacterTextSplitter(
-            separator="\n",
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        loader = PyPDFLoader(file_path)
-        pages = loader.load()
-        docs = text_splitter.split_documents(pages)
         embedding = HuggingFaceHubEmbeddings(
             repo_id="sentence-transformers/all-MiniLM-L6-v2",
             task="feature-extraction",
             huggingfacehub_api_token=os.environ["API_KEY"],
         )
-
         index_name = self.index_name
         self.delete_index()
         pinecone.create_index(
@@ -174,6 +156,27 @@ class LLM:
             embedding,
             index_name=index_name
         )
+        self.upload_status = "UPLOADED"
+
+    def load_document(self, file):
+        import tempfile
+        from langchain.document_loaders import PyPDFLoader
+        from langchain.text_splitter import CharacterTextSplitter
+
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(file.read())
+            file_path = temp_file.name
+        text_splitter = CharacterTextSplitter(
+            separator="\n",
+            chunk_size=1000,
+            chunk_overlap=150,
+            length_function=len
+        )
+        loader = PyPDFLoader(file_path)
+        pages = loader.load()
+        docs = text_splitter.split_documents(pages)
+        self.upload_status = "UPLOADING"
+        threading.Thread(target=self.create_index, args=(docs,)).start()
 
 
 __all__ = ["LLM"]
