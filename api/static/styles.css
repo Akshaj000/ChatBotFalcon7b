@@ -1,20 +1,13 @@
 body {
   display: flex;
   flex-direction: column;
-  height: 95vh;
-  height: 97dvh;
+  height: 98vh;
+  height: 98dvh;
   background-color: #292838; /* Darker background color */
   color: #ffffff;
   font-family: "Arial", sans-serif;
   margin: 0;
-  padding: 20px; /* Adding padding on all four sides */
   overflow: hidden; /* Hide the scroll of the body */
-}
-
-input[type="text"] {
-  color: #ffffff;
-  background-color: #1f1f1f;
-  width: 100%;
 }
 
 #chat-container {
@@ -101,15 +94,28 @@ input[type="text"] {
 form {
   display: flex;
   margin-top: auto;
-  padding: 10px;
+  padding: 8px;
 }
 
 input[type="text"] {
+  color: #ffffff;
+  background-color: #1f1f1f;
+  width: 100%;
   flex: 1;
   padding: 10px;
   border: none;
   border-radius: 5px;
   font-size: 16px;
+}
+
+input[type="file"] {
+  padding: 10px;
+  width: 20dvw;
+  width: 20vw;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: #1f1f1f;
+  color: #ffffff;
 }
 
 button[type="submit"] {
@@ -139,16 +145,64 @@ button[type="submit"]:disabled {
   text-align: left;
 }
 
+#reset-button-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%; /* Ensuring the container spans the full width */
+  padding: 10px; /* Adding some padding for spacing */
+}
+
+button#reset-button {
+  width: 30px; /* Set equal width and height to create a square */
+  height: 30px; /* Adjust this value to control the button size */
+  border: none;
+  border-radius: 5px;
+  background: linear-gradient(45deg, #6143b3, #9eecbd);
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button#reset-button:hover {
+  background: linear-gradient(45deg, rgba(215, 83, 10, 0.9), #ece5e5);
+}
+
+button#reset-button:focus {
+  outline: none;
+}
+
+.top-bar {
+  background-color: #38374d;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 3px;
+  padding-left: 15px;
+}
+
+.top-bar h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
 /* Media query for mobile devices */
 @media only screen and (max-width: 600px) {
-  body {
-    padding: 6px; /* Decrease the padding on smaller screens */
-  }
   .message,
   .message.received,
   .message.typing {
     max-width: 90%; /* Increase the message width for better visibility on smaller screens */
   }
+
+  input[type="file"] {
+    width: 40dvw;
+    width: 40vw;
+  }
+
 
   #chat-container::-webkit-scrollbar {
     display: none; /* Hide the scrollbar on smaller screens */
