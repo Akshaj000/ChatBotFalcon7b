@@ -7,7 +7,7 @@ app = Flask(__name__)
 llm = LLM()
 
 # Folder to store uploaded documents
-UPLOAD_FOLDER = 'api/static/uploads/'
+UPLOAD_FOLDER = 'api/uploaded_documents'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -74,9 +74,11 @@ def upload_file():
             return "No selected file.", 400
 
         if file and allowed_file(file.filename):
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
             filename = "uploaded_document." + file.filename.rsplit('.', 1)[1].lower()
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            llm.load_document()
+            llm.load_document(filename)
             return "File uploaded successfully.", 200
         else:
             return "Invalid file format. Allowed formats: txt, pdf, doc, docx.", 400

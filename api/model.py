@@ -135,7 +135,7 @@ class LLM:
         except Exception:
             pass
 
-    def load_document(self):
+    def load_document(self, file_path):
         from langchain.document_loaders import PyPDFLoader
         from langchain.text_splitter import CharacterTextSplitter
         from langchain.vectorstores import Pinecone
@@ -147,7 +147,7 @@ class LLM:
             chunk_overlap=150,
             length_function=len
         )
-        loader = PyPDFLoader("api/static/uploads/uploaded_document.pdf")
+        loader = PyPDFLoader(file_path)
         pages = loader.load()
         docs = text_splitter.split_documents(pages)
         embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
