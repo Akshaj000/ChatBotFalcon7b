@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 from api.model import LLM
+import threading
 
 # web GUI
 app = Flask(__name__)
@@ -70,9 +71,8 @@ def check_upload():
     elif status == "UPLOADING-PHASE-2":
         llm.delete_index()
     elif status == "UPLOADING-PHASE-3":
-        llm.create_index()
-    elif status == "UPLOADING-PHASE-4":
-        llm.upload_index()
+        thread = threading.Thread(target=llm.upload_index)
+        thread.start()
     if status.startswith("UPLOADING"):
         status = "UPLOADING"
     return status, 200

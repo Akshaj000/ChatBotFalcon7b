@@ -166,17 +166,14 @@ class LLM:
         except Exception:
             pass
 
-    def create_index(self):
+    def upload_index(self):
+        from langchain.vectorstores import Pinecone
         self.upload_status = "UPLOADING-PHASE-4"
         pinecone.create_index(
             name=self.index_name,
             metric='cosine',
             dimension=384
         )
-
-    def upload_index(self):
-        from langchain.vectorstores import Pinecone
-        self.upload_status = "UPLOADING-PHASE-5"
         self.vectordb = Pinecone.from_documents(
             self.docs,
             embedding=self.embedding,
