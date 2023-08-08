@@ -54,8 +54,10 @@ def upload_file():
             return "No selected file.", 400
 
         if file and allowed_file(file.filename):
-            llm.load_document(file)
-            return "File uploaded successfully.", 200
+            llm.upload_file(file)
+            thread = threading.Thread(target=llm.create_index)
+            thread.start()
+            return "File is uploading.", 200
         else:
             return "Invalid file format. Allowed formats: txt, pdf, doc, docx.", 400
 
@@ -66,15 +68,6 @@ def upload_file():
 @app.route('/check-upload', methods=['GET'])
 def check_upload():
     status = llm.upload_status
-    if status == "UPLOADING-PHASE-1":
-        llm.set_embedding()
-    elif status == "UPLOADING-PHASE-2":
-        llm.delete_index()
-    elif status == "UPLOADING-PHASE-3":
-        thread = threading.Thread(target=llm.upload_index)
-        thread.start()
-    if status.startswith("UPLOADING"):
-        status = "UPLOADING"
     return status, 200
 
 

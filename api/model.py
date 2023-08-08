@@ -129,46 +129,48 @@ class LLM:
             output = self.chain.predict(input=message)
         return output
 
-    def load_document(self, file):
+    def delete_index(self):
+        try:
+            pinecone.delete_index(self.index_name)
+        except Exception:
+            pass
+
+    def upload_file(self, file):
+        self.upload_status = "UPLOADING"
         import tempfile
         from langchain.document_loaders import PyPDFLoader
         from langchain.text_splitter import CharacterTextSplitter
 
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(file.read())
-            file_path = temp_file.name
-        text_splitter = CharacterTextSplitter(
-            separator="\n",
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        loader = PyPDFLoader(file_path)
-        pages = loader.load()
-        docs = text_splitter.split_documents(pages)
-        self.upload_status = "UPLOADING-PHASE-1"
-        self.docs = docs
+        try:
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_file.write(file.read())
+                file_path = temp_file.name
 
-    def set_embedding(self):
+            text_splitter = CharacterTextSplitter(
+                separator="\n",
+                chunk_size=1000,
+                chunk_overlap=150,
+                length_function=len
+            )
+            loader = PyPDFLoader(file_path)
+            pages = loader.load()
+            docs = text_splitter.split_documents(pages)
+            self.docs = docs
+
+        except Exception as e:
+            self.upload_status = "NOT_UPLOADED"
+            print(f"An error occurred during file upload: {str(e)}")
+
+    def create_index(self):
+        self.delete_index()
+        from langchain.vectorstores import Pinecone
         from langchain.embeddings import HuggingFaceHubEmbeddings
-        self.upload_status = "UPLOADING-PHASE-2"
         embedding = HuggingFaceHubEmbeddings(
             repo_id="sentence-transformers/all-MiniLM-L6-v2",
             task="feature-extraction",
             huggingfacehub_api_token=os.environ["API_KEY"],
         )
         self.embedding = embedding
-
-    def delete_index(self):
-        self.upload_status = "UPLOADING-PHASE-3"
-        try:
-            pinecone.delete_index(self.index_name)
-        except Exception:
-            pass
-
-    def upload_index(self):
-        from langchain.vectorstores import Pinecone
-        self.upload_status = "UPLOADING-PHASE-4"
         pinecone.create_index(
             name=self.index_name,
             metric='cosine',
