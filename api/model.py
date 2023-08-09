@@ -138,28 +138,33 @@ class LLM:
     def upload_file(self, file):
         self.upload_status = "UPLOADING"
         import tempfile
-        from langchain.document_loaders import PyPDFLoader
+        from langchain.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader
         from langchain.text_splitter import CharacterTextSplitter
-
+        text_splitter = CharacterTextSplitter(
+            separator="\n",
+            chunk_size=1000,
+            chunk_overlap=150,
+            length_function=len
+        )
         try:
             with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                 temp_file.write(file.read())
                 file_path = temp_file.name
-
-            text_splitter = CharacterTextSplitter(
-                separator="\n",
-                chunk_size=1000,
-                chunk_overlap=150,
-                length_function=len
-            )
-            loader = PyPDFLoader(file_path)
-            pages = loader.load()
-            docs = text_splitter.split_documents(pages)
-            self.docs = docs
-
         except Exception as e:
             self.upload_status = "NOT_UPLOADED"
             print(f"An error occurred during file upload: {str(e)}")
+        if file.filename.endswith(".pdf"):
+            loader = PyPDFLoader(file_path)
+        elif file.filename.endswith(".txt"):
+            loader = TextLoader(file_path)
+        elif file.filename.endswith(".docx") or file.filename.endswith(".doc"):
+            loader = Docx2txtLoader(file_path)
+        else:
+            self.upload_status = "NOT_UPLOADED"
+            raise Exception("File type not supported")
+        pages = loader.load()
+        docs = text_splitter.split_documents(pages)
+        self.docs = docs
 
     def create_index(self):
         self.delete_index()

@@ -1,14 +1,53 @@
+import os
+
 from flask import Flask, render_template, request
 from api.model import LLM
-import threading
+from celery import Celery, Task
+from celery.utils.log import get_task_logger
+from dotenv import find_dotenv, load_dotenv
 
-# web GUI
+load_dotenv(find_dotenv())
+
+
+def celery_init_app(flask: Flask) -> Celery:
+    class FlaskTask(Task):
+        def __call__(self, *args: object, **kwargs: object) -> object:
+            with flask.app_context():
+                return self.run(*args, **kwargs)
+
+    celery = Celery(flask.name, task_cls=FlaskTask)
+    celery.config_from_object(flask.config["CELERY"])
+    celery.set_default()
+    flask.extensions["celery"] = celery
+    return celery
+
+
 app = Flask(__name__)
+DEBUG = False
+if os.environ.get("DEBUG", 0) == "1":
+    DEBUG = True
+app.debug = DEBUG
+app.config.from_mapping(
+    CELERY=dict(
+        broker_url="redis://localhost",
+        result_backend="redis://localhost",
+        task_ignore_result=True,
+        broker_connection_retry_on_startup=True,
+    ) if DEBUG else dict(
+        broker_url=os.environ["REDIS_URL"],
+        result_backend=os.environ["REDIS_URL"],
+        task_ignore_result=True,
+        broker_connection_retry_on_startup=True,
+    )
+)
+celery_app = celery_init_app(app)
 llm = LLM()
+logger = get_task_logger(__name__)
+celery_worker = celery_app.Worker()
 
 
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'pdf'}
+    ALLOWED_EXTENSIONS = {'pdf', 'txt', 'doc', 'docx'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
@@ -40,6 +79,16 @@ def send_message():
         return "An error occurred: {}".format(str(e)), 500
 
 
+@celery_app.task
+def create_index_task():
+    try:
+        logger.info("Creating index...")
+        llm.create_index()
+        logger.info("Index creation completed.")
+    except Exception as e:
+        logger.error(f"Error creating index: {str(e)}")
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
@@ -55,8 +104,7 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             llm.upload_file(file)
-            thread = threading.Thread(target=llm.create_index)
-            thread.start()
+            create_index_task.delay()
             return "File is uploading.", 200
         else:
             return "Invalid file format. Allowed formats: txt, pdf, doc, docx.", 400
@@ -72,4 +120,13 @@ def check_upload():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    celery_worker_main = celery_worker.Main(
+        app=celery_app,
+        options={
+            'broker': app.config['CELERY']['broker_url'],
+            'loglevel': 'INFO',
+            'traceback': True,
+        }
+    )
+    celery_worker_main.run()
+    app.run(debug=DEBUG)
