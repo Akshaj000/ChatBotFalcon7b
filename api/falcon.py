@@ -14,6 +14,7 @@ import pinecone
 
 load_dotenv(find_dotenv())
 
+API_KEY = os.environ["API_KEY"]
 
 pinecone.init(
     api_key=os.environ["PINECONE_API_KEY"],  # api key in console
@@ -68,7 +69,7 @@ class LLM:
     def __init__(
         self,
         model_id='tiiuae/falcon-7b-instruct',
-        api_key=os.environ['API_KEY']
+        api_key=API_KEY
     ):
         self.embedding = None
         self.docs = None
@@ -173,7 +174,7 @@ class LLM:
         embedding = HuggingFaceHubEmbeddings(
             repo_id="sentence-transformers/all-MiniLM-L6-v2",
             task="feature-extraction",
-            huggingfacehub_api_token=os.environ["API_KEY"],
+            huggingfacehub_api_token=API_KEY
         )
         self.embedding = embedding
         pinecone.create_index(

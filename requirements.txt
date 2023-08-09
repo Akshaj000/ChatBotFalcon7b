@@ -9,3 +9,9 @@ pypdf==3.15.0
 docx2txt==0.8
 celery==5.3.1
 redis==4.6.0
+Flask-SQLAlchemy==3.0.5
+psycopg2-binary==2.9.7
+Flask-Login==0.6.2
+python-dotenv==1.0.0
+Werkzeug==2.3.6
+Flask-Migrate==4.0.4
