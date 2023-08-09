@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from falcon import LLM
+from api.falcon import LLM
 from celery import Celery
 from dotenv import find_dotenv, load_dotenv
 from flask_sqlalchemy import SQLAlchemy
@@ -54,7 +54,7 @@ def load_user(user_id):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    from models import User
+    from api.models import User
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -68,7 +68,7 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    from models import User
+    from api.models import User
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")

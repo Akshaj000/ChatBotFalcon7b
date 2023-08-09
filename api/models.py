@@ -1,4 +1,4 @@
-from index import db
+from api.index import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
