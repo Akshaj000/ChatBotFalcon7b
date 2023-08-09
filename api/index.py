@@ -22,7 +22,7 @@ app.config.update(
     CELERY_RESULT_BACKEND=os.environ.get("KV_URL", "redis://localhost"),
     CELERY_TASK_IGNORE_RESULT=True,
     CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP=True,
-    SQLALCHEMY_DATABASE_URI=os.environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///db.sqlite"),
+    SQLALCHEMY_DATABASE_URI=os.environ.get("POSTGRES_URL", "sqlite:///db.sqlite"),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     SECRET_KEY=os.environ.get("SECRET_KEY", None)
 )
