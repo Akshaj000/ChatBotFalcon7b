@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='sessions.css') }}">
+  <title>Sessions</title>
+</head>
+<body>
+  <div class="top-bar">
+    <h1 class="top-title">ChatBot</h1>
+    <div id="menu-button-container">
+      <button id="menu-button" onclick="toggleMenu()">
+        <img src="/static/menu.svg" alt="Menu" style="width: 15px; height: 15px;"/>
+      </button>
+    </div>
+  </div>
+  <ul id="dropdown-menu">
+    <li>
+      <button id="reset-button" onclick="logout()" class="menu-item">
+        Logout
+      </button>
+    </li>
+  </ul>
+  <div class="sessions-container">
+    <div class="sessions-grid">
+      {% for session in sessions %}
+        <a class="session-card" href="/?session_id={{ session.id }}">
+          <div class="session-details">
+            <div class="session-title">
+              <h2 contenteditable="true">{{ session.name }}</h2>
+              <button onclick="updateSession('{{ session.id }}', this.previousElementSibling.textContent)">Edit</button>
+            </div>
+            <div class="session-buttons">
+              <button onclick="deleteSession('{{ session.id }}')">Delete</button>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+  <script src="/static/sessions.js"></script>
+</body>
+</html>
