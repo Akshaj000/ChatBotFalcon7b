@@ -1,9 +1,15 @@
+import flask
 from flask import Flask, render_template, request
+from flask_cors import CORS, cross_origin
+
 from api.model import LLM
 import threading
 
+
 # web GUI
 app = Flask(__name__)
+cors = CORS(app, resources={r"/foo": {"origins": "*"}})
+app.config['CORS_HEADERS'] = 'Content-Type'
 llm = LLM()
 
 
@@ -26,6 +32,7 @@ def new():
 
 
 @app.route('/send_message', methods=['POST'])
+@cross_origin()
 def send_message():
     try:
         data = request.get_json()
@@ -35,7 +42,9 @@ def send_message():
         processed_message = str(llm.predict(message))
         if processed_message is None:
             return "Error processing the message.", 500
-        return processed_message
+        response = flask.jsonify({"message": processed_message})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response, 200
     except Exception as e:
         return "An error occurred: {}".format(str(e)), 500
 

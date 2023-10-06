@@ -39,26 +39,21 @@ form.addEventListener("submit", async function (e) {
     showBotTyping();
     submitButton.disabled = true;
     form.reset();
-    fetch('/send_message', {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: userInput,
-      }),
-    }) // Make a request to /new endpoint to reset the conversation
-    .then(response => {
-      if (response.status === 200){
-        return response.text()
-      } else {
-        return "Ops! try again."
-      }
-    })
-    .then(data => {
-      appendMessage(data, true);
-    })
-    .catch(error => console.error("Error resetting conversation:", error));
+    try {
+        const response = await fetch('/send_message', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: userInput,
+            }),
+        })
+        const data = await response.json();
+        appendMessage(data.message, true);
+    } catch (error) {
+        console.error("Error sending message:", error);
+    }
     submitButton.disabled = false;
   }
 });
