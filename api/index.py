@@ -7,7 +7,7 @@ from api.model import LLM
 
 # web GUI
 app = Flask(__name__)
-cors = CORS(app, origins=['https://localhost', 'https:www.akshaj.in'])
+cors = CORS(app, origins=['https://localhost', 'https://www.akshaj.in'])
 llm = LLM()
 
 
