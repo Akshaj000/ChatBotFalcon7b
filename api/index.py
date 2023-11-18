@@ -7,7 +7,7 @@ from api.model import LLM
 
 # web GUI
 app = Flask(__name__)
-cors = CORS(app, origins=['https://localhost', 'https://www.akshaj.in'])
+cors = CORS(app, origins=['https://localhost', 'https://www.akshaj.in', 'https://www.akshaj.in/terminal', 'https://www.akshaj.in/assistant'])
 llm = LLM()
 
 
@@ -30,6 +30,7 @@ def new():
 
 
 @app.route('/send_message', methods=['POST'])
+@cross_origin()
 def send_message():
     try:
         data = request.get_json()
@@ -76,4 +77,4 @@ def check_upload():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
