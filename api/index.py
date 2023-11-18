@@ -3,13 +3,11 @@ from flask import Flask, render_template, request
 from flask_cors import CORS, cross_origin
 
 from api.model import LLM
-import threading
 
 
 # web GUI
 app = Flask(__name__)
-cors = CORS(app, resources={r"/foo": {"origins": "*"}})
-app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app, origins=['https://localhost', 'https:www.akshaj.in'])
 llm = LLM()
 
 
@@ -32,7 +30,6 @@ def new():
 
 
 @app.route('/send_message', methods=['POST'])
-@cross_origin()
 def send_message():
     try:
         data = request.get_json()
@@ -43,7 +40,6 @@ def send_message():
         if processed_message is None:
             return "Error processing the message.", 500
         response = flask.jsonify({"message": processed_message})
-        response.headers.add('Access-Control-Allow-Origin', '*')
         return response, 200
     except Exception as e:
         return "An error occurred: {}".format(str(e)), 500
@@ -64,8 +60,7 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             llm.upload_file(file)
-            thread = threading.Thread(target=llm.create_index)
-            thread.start()
+            llm.create_index()
             return "File is uploading.", 200
         else:
             return "Invalid file format. Allowed formats: txt, pdf, doc, docx.", 400
