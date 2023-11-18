@@ -46,6 +46,23 @@ def send_message():
         return "An error occurred: {}".format(str(e)), 500
 
 
+@app.route('/generate', methods=['POST'])
+@cross_origin()
+def generate():
+    try:
+        data = request.get_json()
+        if data is None or "message" not in data:
+            return "Invalid JSON data or missing 'message' field.", 400
+        message = data["message"]
+        processed_message = str(llm.generate(message))
+        if processed_message is None:
+            return "Error processing the message.", 500
+        response = flask.jsonify({"message": processed_message})
+        return response, 200
+    except Exception as e:
+        return "An error occurred: {}".format(str(e)), 500
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:

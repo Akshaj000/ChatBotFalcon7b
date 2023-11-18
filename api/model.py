@@ -90,6 +90,11 @@ class LLM:
             template=self.template
         )
 
+        self.prompt2 = PromptTemplate(
+            input_variables=["input"],
+            template="{input}"
+        )
+
         self.retrieval_prompt = PromptTemplate(
             input_variables=["history", "context", "input"],
             template=self.retrieval_template
@@ -110,6 +115,12 @@ class LLM:
             memory=self.memory,
         )
 
+        self.direct_chain = LLMChain(
+            llm=self.llm,
+            prompt=self.prompt2,
+            verbose=True
+        )
+
         self.retrieval_chain = LLMChain(
             llm=self.llm,
             verbose=True,
@@ -128,6 +139,11 @@ class LLM:
         else:
             output = self.chain.predict(input=message)
         return output
+
+    def generate(self, message):
+        message = self.direct_chain.predict(input=message)
+        print(message)
+        return message
 
     def delete_index(self):
         try:
